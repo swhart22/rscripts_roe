@@ -1,0 +1,139 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{Abortion Clinic Analysis}
+\author{Sam Hart}
+\date{5/6/2022}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Abortion Clinic Analysis},
+  pdfauthor={Sam Hart},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{average-distance-to-nearest-clinic}{%
+\subsection{Average distance to nearest
+clinic}\label{average-distance-to-nearest-clinic}}
+
+For each county, distance (mi) was computed to the nearest abortion
+clinic in a state without trigger laws or restrictions.
+
+Average distance is \textbf{134.1112451 mi} to the nearest clinic if Roe
+is overturned.
+
+\hypertarget{demographics}{%
+\subsection{Demographics}\label{demographics}}
+
+Average \% women in poverty in all counties: \textbf{15.9992864}
+
+\hypertarget{women-in-poverty-by-distance-from-nearest-post-roe-clinic}{%
+\paragraph{\% Women in poverty by distance from nearest Post-Roe
+clinic}\label{women-in-poverty-by-distance-from-nearest-post-roe-clinic}}
+
+\begin{longtable}[]{@{}rrr@{}}
+\toprule
+Distance from nearest clinic (mi) & Avg. \% Women in poverty & n \\
+\midrule
+\endhead
+0 & 14.45364 & 1504 \\
+100 & 17.16807 & 933 \\
+200 & 17.66865 & 414 \\
+300 & 17.65637 & 172 \\
+400 & 18.00413 & 70 \\
+500 & 17.03985 & 37 \\
+600 & 23.92057 & 10 \\
+\bottomrule
+\end{longtable}
+
+Average \% women without insurance in all counties: \textbf{8.5780812}
+
+\hypertarget{women-without-insurance-by-distance-from-nearest-post-roe-clinic}{%
+\paragraph{\% Women without insurance by distance from nearest Post-Roe
+clinic}\label{women-without-insurance-by-distance-from-nearest-post-roe-clinic}}
+
+\begin{longtable}[]{@{}rrr@{}}
+\toprule
+Distance from nearest clinic (mi) & Avg. \% Women without insurance &
+n \\
+\midrule
+\endhead
+0 & 7.208476 & 1504 \\
+100 & 8.508282 & 933 \\
+200 & 10.407536 & 414 \\
+300 & 11.213506 & 172 \\
+400 & 15.607137 & 70 \\
+500 & 16.783214 & 37 \\
+600 & 20.447842 & 10 \\
+\bottomrule
+\end{longtable}
+
+\end{document}

@@ -1,0 +1,182 @@
+---
+title: "Abortion Clinic Analysis"
+author: "Sam Hart"
+date: "5/6/2022"
+output: 
+  html_document:
+    keep_md: yes
+  md_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(formattable)
+library(scales)
+
+(counties <- read_csv('../mid/distance_census.csv'))
+```
+
+
+```{r distance, include=FALSE}
+
+avg_distance <- mean(counties$miles)
+avg_distance_roe <- mean(counties$miles_roe)
+
+counties <- counties %>%
+  mutate(distance_bucket = floor(miles / 100) * 100)
+
+really_far <- counties %>%
+  filter(distance_bucket >= 500)
+
+far_women_likely <- counties %>%
+  filter(miles >= 300) 
+
+far_women_certain <- counties %>%
+  filter(miles_strict >= 300) 
+
+far_women_now <- counties %>%
+  filter(miles_roe >= 300) 
+
+women_far_likely <- sum(far_women_likely$B01001026)
+women_far_certain <- sum(far_women_certain$B01001026)
+women_far_now <- sum(far_women_now$B01001026)
+
+
+```
+## How many women live far from an abortion clinic? 
+
+With Roe in place, **`r comma(women_far_now)`** women live more than 300 mi from an abortion clinic. 
+
+If Roe is overturned, it's almost certain that **`r comma(women_far_certain)`** will live more than 300 mi from the nearest abortion clinic operating without restrictions.
+
+It is possible and likely that number could be closer to  **`r comma(women_far_likely)`** if certain states impose restrictions.
+
+## Average distance to nearest clinic
+
+This is how things look now, with every clinic's operations protected by the Roe v. Wade decision.
+
+The average distance to the nearest clinic for each county is **`r avg_distance_roe` mi**.
+
+
+```{r, map1, echo=FALSE}
+library(ggplot2)
+library(usmap)
+
+#add 'fips' column to be read by plot_usmap
+distance_df <- counties %>%
+  mutate(fips = str_replace(geoid,'05000US','')) %>%
+  select(miles, miles_roe, miles_strict, fips)
+
+plot_usmap(regions= "counties", data=distance_df, values='miles_roe', color='#ffffff', size=0) +
+  labs(title="distance by county to the nearest clinic (without restrictions)") +
+  scale_fill_continuous(type='viridis', direction=-1, option='magma', limits=c(0, 500))
+```
+If Roe v. Wade is overturned, certain clinics may be shut down by laws in states that choose to do so.
+
+For each county, distance (mi) was computed to the nearest abortion clinic in a state without trigger laws or restrictions.
+
+Average distance is **`r avg_distance` mi** to the nearest clinic if Roe is overturned.
+``` {r, map2, echo=FALSE}
+plot_usmap(regions= "counties", data=distance_df, values='miles_strict', color='#ffffff', size=0) +
+  labs(title="distance by county to the nearest clinic if roe is overturned (almost certain)") +
+  scale_fill_continuous(type='viridis', direction=-1, option='magma', limits=c(0, 300))
+```
+```{r, echo=FALSE}
+plot_usmap(regions= "counties", data=distance_df, values='miles', color='#ffffff', size=0) +
+  labs(title="distance by county to the nearest clinic if roe is overturned (likely)") +
+  scale_fill_continuous(type='viridis', direction=-1, option='magma', limits=c(0, 300))
+```
+
+```{r}
+
+
+avg_women_in_poverty <- summarise_if(counties[c('pct_women_in_poverty')], is.numeric, mean, na.rm = TRUE) * 100
+
+avg_women_in_poverty <- avg_women_in_poverty[[1]]
+
+## old buckets: discrete miles aka 100 200 300 400 500
+poverty_buckets <- counties %>%
+  filter(!is.na(pct_women_in_poverty)) %>%
+  group_by(distance_bucket) %>%
+  summarise(mean_pov = mean(pct_women_in_poverty) * 100, n = n()) %>%
+  rename('Avg. % Women in poverty' = mean_pov, 'Distance from nearest clinic (mi)' = distance_bucket)
+
+## quintile calculations
+q = c(0.2, 0.4, 0.6, 0.8)
+pov_by_mile_quant <- counties %>%
+  filter(!is.na(pct_women_in_poverty))
+
+mile_quants <- quantile(counties$miles, q)
+
+pov_by_mile_quant <- pov_by_mile_quant %>%
+  mutate(mile_quant = findInterval(miles, mile_quants)) %>%
+  group_by(mile_quant) %>%
+  summarise(mean_pov = mean(pct_women_in_poverty) * 100, n = n()) %>%
+  mutate(mile_quant = (mile_quant + 1) * 20) %>%
+  rename('% women in poverty' = mean_pov, 'quintile of distance from nearest clinic (nth)' = mile_quant)
+  
+```
+## Demographics
+
+Average % women in poverty in all counties: **`r avg_women_in_poverty `**
+
+#### % Women in poverty by distance from nearest Post-Roe clinic
+```{r echo=FALSE, results='asis'}
+library(knitr)
+kable(pov_by_mile_quant, 'pipe')
+```
+
+```{r, map3, echo=FALSE}
+#add 'fips' column to be read by plot_usmap
+poverty_df <- counties %>%
+  mutate(fips = str_replace(geoid,'05000US','')) %>%
+  mutate(pov_x_distance = pct_women_in_poverty * miles) %>%
+  select(pov_x_distance, fips)
+
+plot_usmap(regions= "counties", data=poverty_df, values='pov_x_distance', color='#ffffff', size=0) +
+  scale_fill_continuous(type='viridis', direction=-1, option='magma')
+```
+
+```{r pressure, echo=FALSE}
+
+avg_women_wo_ins <- summarise_if(counties[c('pct_women_wo_insurance')], is.numeric, mean, na.rm = TRUE) * 100
+
+avg_women_wo_ins <- avg_women_wo_ins[[1]]
+
+insurance_buckets <- counties %>%
+  filter(!is.na(pct_women_wo_insurance)) %>%
+  group_by(distance_bucket) %>%
+  summarise(mean_ins = mean(pct_women_wo_insurance) * 100, n = n()) %>%
+  rename('Avg. % Women without insurance' = mean_ins, 'Distance from nearest clinic (mi)' = distance_bucket)
+ins_by_mile_quant <- counties %>%
+  filter(!is.na(pct_women_wo_insurance))
+
+ins_by_mile_quant <- ins_by_mile_quant %>%
+  mutate(mile_quant = findInterval(miles, mile_quants)) %>%
+  group_by(mile_quant) %>%
+  summarise(mean_ins = mean(pct_women_wo_insurance) * 100, n = n()) %>%
+  mutate(mile_quant = mile_quant + 1) %>%
+  rename('% women without health insurance' = mean_ins, 'quintile of distance from nearest clinic (nth)' = mile_quant)
+
+```
+
+Average % women without insurance in all counties: **`r avg_women_wo_ins `**
+
+#### % Women without insurance by distance from nearest Post-Roe clinic
+```{r echo=FALSE, results='asis'}
+library(knitr)
+kable(ins_by_mile_quant, 'pipe')
+```
+
+```{r, map4, echo=FALSE}
+#add 'fips' column to be read by plot_usmap
+insurance_df <- counties %>%
+  mutate(fips = str_replace(geoid,'05000US','')) %>%
+  mutate(no_ins_x_distance = pct_women_wo_insurance * miles) %>%
+  select(no_ins_x_distance, fips)
+
+plot_usmap(regions= "counties", data=insurance_df, values='no_ins_x_distance', color='#ffffff', size=0) +
+  scale_fill_continuous(type='viridis', direction=-1, option='magma')
+```
+
